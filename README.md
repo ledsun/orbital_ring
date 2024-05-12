@@ -22,7 +22,7 @@ It is intended to work with ruby.wasm.
 Load the Ruby script that defines the constants from the `app_root` directory.
 For example, when the App class is called, `./app_root/app.rb` is load.
 
-To enable auto loadding, execute the following function:
+To enable auto loading, execute the following function:
 
 ```ruby
 OrbitalRing::Loader.setup
