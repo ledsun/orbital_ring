@@ -18,14 +18,14 @@ class OrbitalRing
 
     private
 
-    # const_missingを定義して、見つからない定数をリモートから読み込む
+    # Define const_missing to read missing constants remotely
     def self.define_const_missing(dir, mod)
       mod.define_singleton_method(:const_missing) do |id|
-        # 定数名をスネークケースに変換して、リモートから読み込む
+        # Convert constant name to snake case and read remotely
         feature_name = Util.to_snake_case(id)
         JS::RequireRemote.instance.load("#{dir}/#{feature_name}")
 
-        # 読み込んだモジュールにconst_missingを定義する
+        # Define const_missing in the loaded module
         loaded_module = const_get(id)
         Loader.define_const_missing dir, loaded_module
         loaded_module
@@ -35,7 +35,7 @@ class OrbitalRing
 
   module Renderer
     def self.included(base)
-      # テンプレートをキャッシュする変数を定義
+      # Define variables to cache templates
       base.define_method(:tempaltes_cache) { @tempaltes_cache ||= {} }
     end
 
@@ -43,8 +43,9 @@ class OrbitalRing
       tempaltes_cache[template_name] = load_template(template_name) unless tempaltes_cache[template_name]
 
       if(locals[:collection])
-        # コレクションを渡してテンプレートを呼び出すと
-        # テンプレートからは、テンプレートと同じ名前の変数を経由してコレクションの個別のメンバーにアクセスできます。
+        # When a collection is passed and a template is called,
+        # the template can access individual members of the collection via a variable
+        # with the same name as the template.
         locals[:collection].map do
            render_one template_name,
                       { template_name.to_s => _1 }
@@ -57,7 +58,7 @@ class OrbitalRing
     private
 
     def load_template(template_name)
-      # テンプレート名から、ファイル名を決定します。
+      # Determine the file name from the template name.
       feature_name = "#{Util.to_snake_case(template_name)}.html.erb"
       path = "#{OrbitalRing.instance.dir}/templates"
       url = "#{path}/#{feature_name}"
@@ -68,8 +69,8 @@ class OrbitalRing
     end
 
     def render_one(template_name, locals)
-      # テンプレート内でrenderメソッドを使えるようにするために
-      # このメソッドのbindingを指定します。
+      # Specify the binding for this method
+      # to allow the render method to be used in the template.
       b = binding
       locals.each { |key, value| b.local_variable_set key, value }
       tempaltes_cache[template_name].result b
